@@ -1,0 +1,4 @@
+First we need to strip a lot of the database and rebuild it from scratch. 
+We will still keep the puzzle part and the users will be google oauth most likely credentials.  
+server will have a websocket for pvp matches which i think 1-8 players??!? (maybe test later for huge games)
+
