@@ -35,7 +35,7 @@ router.get("/:id", (req, res) => {
 });
 
 // add puzzle and words
-router.post("/", restricted, async (req, res) => {
+router.post("/", async (req, res) => {
   let { name, code, description, words } = req.body;
   let newObj = {
     name,

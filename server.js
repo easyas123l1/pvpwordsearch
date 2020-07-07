@@ -5,12 +5,14 @@ const morgan = require("morgan");
 const session = require("express-session");
 const KnexSessionStore = require("connect-session-knex")(session);
 
+const PuzzleRouter = require("./puzzles/puzzle-router.js");
+
 const knex = require("./data/db-config");
 const server = express();
 
 const sessionConfig = {
   name: "secret", //sid
-  secret: "keep it secret, keep it safe!",
+  secret: process.env.SESSION_SECRET,
   saveUninitialized: false, //GDPR laws against setting cookies automatically
   resave: false,
   store: new KnexSessionStore({
@@ -32,6 +34,8 @@ server.use(helmet());
 server.use(cors());
 server.use(morgan("dev"));
 server.use(session(sessionConfig));
+
+server.use("/puzzle", PuzzleRouter);
 
 // server sanity check
 server.use("/", (req, res) => {
