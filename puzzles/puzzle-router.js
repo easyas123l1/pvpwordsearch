@@ -1,7 +1,6 @@
 const router = require("express").Router();
 
 const Puzzles = require("./puzzle-model.js");
-const restricted = require("../auth/restricted-middleware");
 
 // get all puzzles
 router.get("/", (req, res) => {
