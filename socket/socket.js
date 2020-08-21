@@ -6,6 +6,7 @@ const { v4: uuid } = require("uuid");
 
 let possibleWords = [];
 const rooms = {};
+const connections = {};
 
 const loadPossibleWords = (file) => {
     try {
@@ -73,11 +74,36 @@ const getRooms = () => {
 };
 
 io.on("connection", (socket) => {
-    socket.id = uuid();
-    console.log("a user connected  ", socket.id);
-    const roomNames = getRooms();
-    console.log(socket.id, " getting rooms");
-    socket.emit("rooms", roomNames);
+    socket.emit("getUserInfo");
+
+    /**
+     * Gets fired when a user connects should respond with userInfo
+     */
+    socket.on("userInfo", (email) => {
+        // make sure user sent us a email
+        if (email) {
+            // if user hasn't been set yet.
+            if (!socket.email) {
+                // check if user already logged in by email
+                if (email in connections) {
+                    socket.emit("alreadyConnected");
+                } else {
+                    socket.id = uuid();
+                    socket.email = email;
+                    connections[email] = socket.id;
+                    socket.emit("goodConnection");
+                    console.log("a user connected  ", socket.email);
+                    console.log(connections);
+                }
+            } else if (socket.email === email) {
+                socket.emit("goodConnection");
+            } else if (socket.email !== email) {
+                // !*TO BE DONE!*not the same user...
+            }
+            const roomNames = getRooms();
+            socket.emit("rooms", roomNames);
+        }
+    });
     /**
      * Gets fired when a user wants to create a new room.
      */
@@ -86,18 +112,20 @@ io.on("connection", (socket) => {
             id: uuid(), // generate a unique id for the new room, that way we don't need to deal with duplicates.
             name: roomName,
             sockets: [],
+            players: [],
         };
         rooms[room.id] = room;
         // have the socket join the room they've just created.
         joinRoom(socket, room);
         const roomNames = getRooms();
-        console.log(socket.id, " getting rooms");
         io.emit("rooms", roomNames);
     });
 
+    /**
+     * Gets fired when user wants list of rooms.
+     */
     socket.on("getRoomNames", (data) => {
         const roomNames = getRooms();
-        console.log(socket.id, " getting rooms");
         socket.emit("rooms", roomNames);
     });
 
@@ -119,10 +147,28 @@ io.on("connection", (socket) => {
     });
 
     /**
+     * Gets fired when a player logs out of google account
+     */
+    socket.on("disconnecting", () => {
+        if (socket.email) {
+            console.log("user disconnected  ", socket.email);
+            delete connections[socket.email];
+            console.log(connections);
+            socket.email = undefined;
+            socket.id = undefined;
+        }
+        leaveRooms(socket);
+    });
+
+    /**
      * Gets fired when a player disconnects from the server.
      */
     socket.on("disconnect", () => {
-        console.log("user disconnected");
+        if (socket.email) {
+            console.log("user disconnected  ", socket.email);
+            delete connections[socket.email];
+            console.log(connections);
+        }
         leaveRooms(socket);
     });
 });
