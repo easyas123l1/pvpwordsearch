@@ -22,6 +22,20 @@ const loadPossibleWords = (file) => {
 loadPossibleWords("./socket/words.txt");
 
 /**
+ * Will start the game changing room state to STARTING
+ * @param room An object that represents a room from the `rooms` instance variable object
+ */
+const startGame = (socket, room) => {
+    // only host can start the game!
+    if (socket.id === room.hostId) {
+        room.state = "STARTING";
+        room.sockets.forEach((socket) => {
+            socket.emit("gameStarting");
+        });
+    }
+};
+
+/**
  * Will update the state of a room and emit to all sockets
  * @param room An object that represents a room from the `rooms` instance variable object
  */
@@ -31,6 +45,7 @@ const updateRoom = (room) => {
         id: room.id,
         name: room.name,
         state: room.state,
+        puzzle: room.puzzle,
     };
 
     room.sockets.forEach((socket) => {
@@ -49,6 +64,7 @@ const joinRoom = (socket, room) => {
         const playerObj = {
             email: socket.email,
             id: socket.id,
+            score: 0,
         };
         room.players.push(playerObj);
         socket.join(room.id, () => {
@@ -56,7 +72,6 @@ const joinRoom = (socket, room) => {
             socket.roomId = room.id;
             console.log(socket.id, "Joined", room.id);
             console.log(room.sockets.length);
-
             updateRoom(room);
         });
     }
@@ -93,7 +108,11 @@ const leaveRooms = (socket) => {
             socket.leave(id);
             // remove the socket from the room object
             room.sockets = room.sockets.filter((item) => item !== socket);
-            room.players = room.players.filter((item) => item.id !== socket.id);
+            if (room.state === "FILLING") {
+                room.players = room.players.filter(
+                    (item) => item.id !== socket.id
+                );
+            }
             // if there is other players we need to update the room
             if (room.sockets.length > 0) {
                 // check host left lobby before game start.
@@ -124,8 +143,8 @@ const leaveRooms = (socket) => {
 const getRooms = () => {
     const roomNames = [];
     for (const id in rooms) {
-        const { name, players, state } = rooms[id];
-        const room = { id, name, players, state };
+        const { name, players, state, puzzle, hostId } = rooms[id];
+        const room = { id, name, players, state, puzzle, hostId };
         roomNames.push(room);
     }
     return roomNames;
@@ -169,16 +188,23 @@ io.on("connection", (socket) => {
     /**
      * Gets fired when a user wants to create a new room.
      */
-    socket.on("createRoom", (roomName) => {
+    socket.on("createRoom", (roomInfo) => {
         if (!socket.roomId) {
             const room = {
                 id: uuid(), // generate a unique id for the new room, that way we don't need to deal with duplicates.
-                name: roomName,
+                name: roomInfo.name,
                 sockets: [],
                 players: [],
                 // state will let us know what phase the room is in.
                 state: "FILLING",
                 hostId: socket.id,
+                puzzle: {
+                    size: roomInfo.size,
+                    numberOfWords: roomInfo.numberOfWords,
+                    timer: roomInfo.timer,
+                    words: [],
+                    puzzle: "",
+                },
             };
             rooms[room.id] = room;
             // have the socket join the room they've just created.
@@ -200,6 +226,11 @@ io.on("connection", (socket) => {
     socket.on("joinRoom", (roomId) => {
         const room = rooms[roomId];
         joinRoom(socket, room);
+    });
+
+    socket.on("startGame", () => {
+        const room = rooms[socket.roomId];
+        startGame(socket, room);
     });
 
     /* 
