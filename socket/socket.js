@@ -4,12 +4,15 @@ const io = require("socket.io")(http);
 const fs = require("fs");
 const { v4: uuid } = require("uuid");
 
+const MAXWORDS = 58114;
+
 let possibleWords = [];
 const rooms = {};
 const connections = {};
 const connectionsEmail = {};
 
 const loadPossibleWords = (file) => {
+    // success will add 58114 words
     try {
         var data = fs.readFileSync(file, "utf8");
         data = data.replace(/(\r)/gm, "");
@@ -21,6 +24,19 @@ const loadPossibleWords = (file) => {
 
 loadPossibleWords("./socket/words.txt");
 
+const generatePuzzle = (roomPuzzle) => {
+    const { size, numberOfWords, timer, words, puzzle } = roomPuzzle;
+    console.log(size);
+    uniqueRandomNumbers = [];
+    while (uniqueRandomNumbers.length < size) {
+        let r = Math.floor(Math.random() * MAXWORDS);
+        if (uniqueRandomNumbers.indexOf(r) === -1) {
+            uniqueRandomNumbers.push(r);
+            words.push(possibleWords[r]);
+        }
+    }
+};
+
 /**
  * Will start the game changing room state to STARTING
  * @param room An object that represents a room from the `rooms` instance variable object
@@ -29,6 +45,8 @@ const startGame = (socket, room) => {
     // only host can start the game!
     if (socket.id === room.hostId) {
         room.state = "STARTING";
+        // !TODO! generate the puzzle here should be fine.
+        generatePuzzle(room.puzzle);
         room.sockets.forEach((socket) => {
             socket.emit("gameStarting");
         });
@@ -46,6 +64,7 @@ const updateRoom = (room) => {
         name: room.name,
         state: room.state,
         puzzle: room.puzzle,
+        hostId: room.hostId,
     };
 
     room.sockets.forEach((socket) => {
