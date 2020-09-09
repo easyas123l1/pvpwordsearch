@@ -3,8 +3,11 @@ const http = require("http").Server(server);
 const io = require("socket.io")(http);
 const fs = require("fs");
 const { v4: uuid } = require("uuid");
-
-const MAXWORDS = 58114;
+const {
+    placeWords,
+    createLines,
+    wordPositionDirection,
+} = require("./puzzleFunctions");
 
 let possibleWords = [];
 const rooms = {};
@@ -25,16 +28,24 @@ const loadPossibleWords = (file) => {
 loadPossibleWords("./socket/words.txt");
 
 const generatePuzzle = (roomPuzzle) => {
-    const { size, numberOfWords, timer, words, puzzle } = roomPuzzle;
-    console.log(size);
+    let { size, numberOfWords, words } = roomPuzzle;
     uniqueRandomNumbers = [];
-    while (uniqueRandomNumbers.length < size) {
-        let r = Math.floor(Math.random() * MAXWORDS);
+    while (words.length < numberOfWords) {
+        let r = Math.floor(Math.random() * possibleWords.length);
         if (uniqueRandomNumbers.indexOf(r) === -1) {
             uniqueRandomNumbers.push(r);
-            words.push(possibleWords[r]);
+            words.push(possibleWords[r].toUpperCase());
         }
     }
+    const answers = placeWords(words, size);
+    const lines = createLines(answers, size);
+    console.log(answers);
+    let letters = [];
+    lines.forEach((line) => {
+        line.text.map((letter) => letters.push(letter.text));
+    });
+    roomPuzzle.puzzle = letters.join("");
+    roomPuzzle.wordsDir = wordPositionDirection(words, answers);
 };
 
 /**
@@ -47,9 +58,12 @@ const startGame = (socket, room) => {
         room.state = "STARTING";
         // !TODO! generate the puzzle here should be fine.
         generatePuzzle(room.puzzle);
-        room.sockets.forEach((socket) => {
-            socket.emit("gameStarting");
-        });
+        console.log(room.puzzle.puzzle, "THEPUZZLE", room.puzzle.wordsDir);
+        updateRoom(room);
+        setTimeout(() => {
+            room.state = "START";
+            updateRoom(room);
+        }, 300);
     }
 };
 
@@ -209,7 +223,7 @@ io.on("connection", (socket) => {
      */
     socket.on("createRoom", (roomInfo) => {
         if (!socket.roomId) {
-            const room = {
+            let room = {
                 id: uuid(), // generate a unique id for the new room, that way we don't need to deal with duplicates.
                 name: roomInfo.name,
                 sockets: [],
@@ -222,6 +236,7 @@ io.on("connection", (socket) => {
                     numberOfWords: roomInfo.numberOfWords,
                     timer: roomInfo.timer,
                     words: [],
+                    wordsDir: [],
                     puzzle: "",
                 },
             };
