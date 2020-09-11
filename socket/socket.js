@@ -28,24 +28,37 @@ const loadPossibleWords = (file) => {
 loadPossibleWords("./socket/words.txt");
 
 const generatePuzzle = (roomPuzzle) => {
-    let { size, numberOfWords, words } = roomPuzzle;
+    let {
+        size,
+        numberOfWords,
+        words,
+        minimumWordSize,
+        maximumWordSize,
+    } = roomPuzzle;
     uniqueRandomNumbers = [];
+    let allWordsLength = 0;
     while (words.length < numberOfWords) {
         let r = Math.floor(Math.random() * possibleWords.length);
         if (uniqueRandomNumbers.indexOf(r) === -1) {
             uniqueRandomNumbers.push(r);
-            words.push(possibleWords[r].toUpperCase());
+            if (
+                possibleWords[r].length >= minimumWordSize &&
+                possibleWords[r].length <= maximumWordSize
+            ) {
+                words.push(possibleWords[r].toUpperCase());
+                allWordsLength += possibleWords[r].length;
+            }
         }
     }
     const answers = placeWords(words, size);
     const lines = createLines(answers, size);
-    console.log(answers);
     let letters = [];
     lines.forEach((line) => {
         line.text.map((letter) => letters.push(letter.text));
     });
     roomPuzzle.puzzle = letters.join("");
     roomPuzzle.wordsDir = wordPositionDirection(words, answers);
+    // something to check if answers.length and allWordsLength are the same.
 };
 
 /**
@@ -63,7 +76,7 @@ const startGame = (socket, room) => {
         setTimeout(() => {
             room.state = "START";
             updateRoom(room);
-        }, 300);
+        }, 3000);
     }
 };
 
@@ -104,7 +117,6 @@ const joinRoom = (socket, room) => {
             // store the room id in the socket for future use
             socket.roomId = room.id;
             console.log(socket.id, "Joined", room.id);
-            console.log(room.sockets.length);
             updateRoom(room);
         });
     }
@@ -122,8 +134,8 @@ const disconnectServer = (socket) => {
         console.log("user disconnected  ", socket.email);
         socket.email = undefined;
         socket.id = undefined;
-        console.log(connections);
-        console.log(connectionsEmail);
+        console.log("connections", connections);
+        console.log("connectionsEmail", connectionsEmail);
     }
 };
 
@@ -235,6 +247,8 @@ io.on("connection", (socket) => {
                     size: roomInfo.size,
                     numberOfWords: roomInfo.numberOfWords,
                     timer: roomInfo.timer,
+                    minimumWordSize: roomInfo.minimumWordSize,
+                    maximumWordSize: roomInfo.maximumWordSize,
                     words: [],
                     wordsDir: [],
                     puzzle: "",

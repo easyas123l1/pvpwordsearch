@@ -380,10 +380,7 @@ const randomPosition = (size) => {
 const wordPositionDirection = (words, answers) => {
     let index = 0;
     let final = [];
-    console.log(answers.length);
-    console.log(words);
     for (let word of words) {
-        console.log(index, answers[index]);
         let dir = "";
         let first = answers[index].position;
         let second = answers[index + 1].position;
@@ -421,7 +418,6 @@ const wordPositionDirection = (words, answers) => {
         };
         final.push(newObj);
         index += word.length;
-        console.log(word, " ", word.length);
     }
     return final;
 };
