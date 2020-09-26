@@ -72,7 +72,11 @@ const startGame = (socket, room) => {
         // !TODO! generate the puzzle here should be fine.
         generatePuzzle(room.puzzle);
         console.log(room.puzzle.puzzle, "THEPUZZLE", room.puzzle.wordsDir);
+        room.players.forEach((player) => {
+            player.wordsDir = room.puzzle.wordsDir;
+        });
         updateRoom(room);
+
         setTimeout(() => {
             room.state = "START";
             updateRoom(room);
@@ -111,6 +115,7 @@ const joinRoom = (socket, room) => {
             email: socket.email,
             id: socket.id,
             score: 0,
+            wordsDir: room.puzzle.wordsDir,
         };
         room.players.push(playerObj);
         socket.join(room.id, () => {
