@@ -56,6 +56,7 @@ const generatePuzzle = (roomPuzzle) => {
     lines.forEach((line) => {
         line.text.map((letter) => letters.push(letter.text));
     });
+    roomPuzzle.lines = lines;
     roomPuzzle.puzzle = letters.join("");
     roomPuzzle.wordsDir = wordPositionDirection(words, answers);
     // something to check if answers.length and allWordsLength are the same.
@@ -74,6 +75,7 @@ const startGame = (socket, room) => {
         console.log(room.puzzle.puzzle, "THEPUZZLE", room.puzzle.wordsDir);
         room.players.forEach((player) => {
             player.wordsDir = room.puzzle.wordsDir;
+            player.lines = room.puzzle.lines;
         });
         updateRoom(room);
 
@@ -115,8 +117,11 @@ const joinRoom = (socket, room) => {
             email: socket.email,
             id: socket.id,
             score: 0,
-            wordsDir: room.puzzle.wordsDir,
+            wordsDir: [],
+            lines: [],
         };
+        playerObj.wordsDir = room.puzzle.wordsDir;
+        playerObj.lines = room.puzzle.lines;
         room.players.push(playerObj);
         socket.join(room.id, () => {
             // store the room id in the socket for future use
@@ -254,6 +259,7 @@ io.on("connection", (socket) => {
                     timer: roomInfo.timer,
                     minimumWordSize: roomInfo.minimumWordSize,
                     maximumWordSize: roomInfo.maximumWordSize,
+                    lines: [],
                     words: [],
                     wordsDir: [],
                     puzzle: "",
