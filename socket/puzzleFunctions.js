@@ -417,6 +417,7 @@ const wordPositionDirection = (words, answers) => {
             direction: dir,
             solved: false,
             id: uuid(),
+            color: "",
         };
         final.push(newObj);
         index += word.length;
