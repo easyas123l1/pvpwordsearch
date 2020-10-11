@@ -63,7 +63,33 @@ const generatePuzzle = (roomPuzzle) => {
 };
 
 /**
+ * Will solve a word and update users wordsDir lines and word score.
+ * @param socket A connected socket.io socket
+ * @param room A object that represents a room from the `rooms` instance variable object
+ * @param word A object with word that the user solved.
+ */
+const solveWord = (socket, room, word) => {
+    room.players.map((player) => {
+        if (player.id === socket.id) {
+            console.log(player);
+            console.log(word);
+            player.wordsDir.map((playword) => {
+                if (
+                    playword.word === word.word &&
+                    playword.position === word.position &&
+                    playword.direction === word.direction
+                ) {
+                    playword.solved = word.solved;
+                    playword.color = word.color;
+                }
+            });
+        }
+    });
+};
+
+/**
  * Will start the game changing room state to STARTING
+ * @param socket A connected socket.io socket
  * @param room An object that represents a room from the `rooms` instance variable object
  */
 const startGame = (socket, room) => {
@@ -287,9 +313,20 @@ io.on("connection", (socket) => {
         joinRoom(socket, room);
     });
 
+    /**
+     * Gets fired when a player starts the game.
+     */
     socket.on("startGame", () => {
         const room = rooms[socket.roomId];
         startGame(socket, room);
+    });
+
+    /**
+     * Gets fired when a player solves a word.
+     */
+    socket.on("solveWord", (word) => {
+        const room = rooms[socket.roomId];
+        solveWord(socket, room, word);
     });
 
     /* 
