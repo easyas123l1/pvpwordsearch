@@ -83,6 +83,11 @@ const solveWord = (socket, room, word, lines) => {
                     playerWord.color = word.color;
                     player.lines = lines;
                     player.score += 1;
+                    if (room.puzzle.numberOfWords === player.score) {
+                        // change room.state to game over user won
+                        room.state = "GAMEOVER";
+                        updateRoom(room);
+                    }
                 }
             });
             console.log(player);
