@@ -90,7 +90,6 @@ const solveWord = (socket, room, word, lines) => {
                     }
                 }
             });
-            console.log(player);
         }
     });
 };
