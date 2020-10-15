@@ -95,6 +95,22 @@ const solveWord = (socket, room, word, lines) => {
 };
 
 /**
+ * Will start the game timer
+ * @param room An object that represents a room from the `rooms` instance variable object
+ */
+const startTimer = (room) => {
+    if (room.puzzle.timer >= 0) {
+        setTimeout(() => {
+            room.puzzle.timer -= 1;
+            startTimer(room);
+        }, 1000);
+    } else {
+        room.state = "GAMEOVER";
+    }
+    updateRoom(room);
+};
+
+/**
  * Will start the game changing room state to STARTING
  * @param socket A connected socket.io socket
  * @param room An object that represents a room from the `rooms` instance variable object
@@ -115,6 +131,8 @@ const startGame = (socket, room) => {
         setTimeout(() => {
             room.state = "START";
             updateRoom(room);
+            // start game room timer.
+            startTimer(room);
         }, 3000);
     }
 };
