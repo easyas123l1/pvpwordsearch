@@ -86,7 +86,6 @@ const solveWord = (socket, room, word, lines) => {
                     if (room.puzzle.numberOfWords === player.score) {
                         // change room.state to game over user won
                         room.state = "GAMEOVER";
-                        updateRoom(room);
                     }
                 }
             });
@@ -99,15 +98,15 @@ const solveWord = (socket, room, word, lines) => {
  * @param room An object that represents a room from the `rooms` instance variable object
  */
 const startTimer = (room) => {
-    if (room.puzzle.timer >= 0) {
+    if (room.puzzle.timer >= 0 && room.state !== "GAMEOVER") {
         setTimeout(() => {
             room.puzzle.timer -= 1;
             startTimer(room);
         }, 1000);
     } else {
         room.state = "GAMEOVER";
+        endGame(room);
     }
-    updateRoom(room);
 };
 
 /**
@@ -181,6 +180,20 @@ const joinRoom = (socket, room) => {
             updateRoom(room);
         });
     }
+};
+
+/**
+ * Will end the game for the current room.
+ * @param room An object that represents a room from the `rooms` instance variable object
+ */
+const endGame = (room) => {
+    // should end the game and return array with placements based off score.
+    // Ties can and will happen. Solution Example: [1st, 1st, 3rd]
+    // placement array will be an array of objects with each object
+    // having a user then place. IE: [{easy, 1st}, {another, 2nd}]
+    const playerPlacements = room.players.sort((a, b) => {
+        return a.score - b.score;
+    });
 };
 
 /**
