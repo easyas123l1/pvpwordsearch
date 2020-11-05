@@ -87,6 +87,7 @@ const solveWord = (socket, room, word, lines) => {
                         // change room.state to game over user won
                         room.state = "GAMEOVER";
                     }
+                    updateRoom(room);
                 }
             });
         }
