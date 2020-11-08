@@ -1,51 +1,66 @@
+const { table } = require("../db-config");
+
 exports.up = function (knex) {
-  return knex.schema
-    .createTable("users", (tbl) => {
-      tbl.increments();
+    return knex.schema
+        .createTable("users", (tbl) => {
+            tbl.increments();
 
-      tbl.string("name", 255).notNullable();
+            tbl.string("email", 255).notNullable().unique();
 
-      tbl.string("imageurl", 255);
+            tbl.string("name", 255);
 
-      tbl.string("email", 255);
+            tbl.string("imageurl", 255);
+        })
+        .createTable("games", (tbl) => {
+            tbl.increments();
 
-      tbl.string("created").notNullable();
+            tbl.string("name", 255).notNullable().unique();
 
-      tbl.integer("wordsFound").notNullable();
-    })
-    .createTable("puzzles", (tbl) => {
-      tbl.increments();
+            tbl.string("code", 8000).notNullable();
 
-      tbl.string("name", 255).notNullable().unique();
+            tbl.string("description", 500);
 
-      tbl.string("code", 8000).notNullable();
+            tbl.integer("rating");
+        })
+        .createTable("games_users", (tbl) => {
+            tbl.increments();
 
-      tbl.string("description", 500);
+            tbl.integer("user_id")
+                .unsigned()
+                .references("id")
+                .inTable("users")
+                .onDelete("RESTRICT")
+                .onUpdate("CASCADE");
 
-      tbl.integer("rating");
-    })
-    .createTable("words", (tbl) => {
-      tbl.increments();
+            tbl.integer("game_id")
+                .unsigned()
+                .references("id")
+                .inTable("games")
+                .onDelete("RESTRICT")
+                .onUpdate("CASCADE");
+        })
+        .createTable("words", (tbl) => {
+            tbl.increments();
 
-      tbl.string("word", 255).notNullable().index();
+            tbl.string("word", 255).notNullable().index();
 
-      tbl.string("position").notNullable();
+            tbl.string("position").notNullable();
 
-      tbl.string("direction").notNullable();
+            tbl.string("direction").notNullable();
 
-      tbl
-        .integer("puzzle_id")
-        .unsigned()
-        .references("id")
-        .inTable("puzzles")
-        .onDelete("RESTRICT")
-        .onUpdate("CASCADE");
-    });
+            tbl.integer("games_id")
+                .unsigned()
+                .references("id")
+                .inTable("puzzles")
+                .onDelete("RESTRICT")
+                .onUpdate("CASCADE");
+        });
 };
 
 exports.down = function (knex) {
-  return knex.schema
-    .dropTableIfExists("words")
-    .dropTableIfExists("puzzles")
-    .dropTableIfExists("users");
+    return knex.schema
+        .dropTableIfExists("words")
+        .dropTableIfExists("games_users")
+        .dropTableIfExists("games")
+        .dropTableIfExists("users");
 };
