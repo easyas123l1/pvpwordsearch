@@ -1,41 +1,56 @@
 const db = require("../data/db-config.js");
 
 module.exports = {
-  getPuzzles,
-  addPuzzle,
-  addWords,
-  getPuzzle,
-  getWords,
+    addUser,
+    getUserByEmail,
+    getGames,
+    addGame,
+    addWords,
+    getGame,
+    getWords,
 };
 
-function getPuzzles() {
-  return db("puzzles");
+function addUser(user) {
+    return db("users")
+        .insert(user, "id")
+        .then((ids) => {
+            const [id] = ids;
+            return id;
+        });
 }
 
-function addPuzzle(data) {
-  return db("puzzles")
-    .insert(data, "id")
-    .then((ids) => {
-      const [id] = ids;
+function getUserByEmail(email) {
+    return db("users").where("email", "=", email).first();
+}
 
-      return id;
-    });
+function getGames() {
+    return db("puzzles");
+}
+
+function addGame(data) {
+    return db("puzzles")
+        .insert(data, "id")
+        .then((ids) => {
+            const [id] = ids;
+
+            return id;
+        });
 }
 
 function addWords(words) {
-  return db("words")
-    .insert(words, "id")
-    .then((ids) => {
-      const [id] = ids;
+    return db("words")
+        .insert(words, "id")
+        .then((ids) => {
+            const [id] = ids;
 
-      return id;
-    });
+            return id;
+        });
 }
 
-function getPuzzle(id) {
-  return db("puzzles").where("id", "=", id).first();
+function getGame(id) {
+    return db("puzzles").where("id", "=", id).first();
 }
 
 function getWords(id) {
-  return db("words").where("puzzle_id", "=", id);
+    return db("words").where("puzzle_id", "=", id);
 }
