@@ -8,6 +8,7 @@ const {
     createLines,
     wordPositionDirection,
 } = require("./puzzleFunctions");
+const { savePuzzle } = require("../puzzles/puzzle-saver.js");
 
 let possibleWords = [];
 const rooms = {};
@@ -192,9 +193,10 @@ const endGame = (room) => {
     // Ties can and will happen. Solution Example: [1st, 1st, 3rd]
     // placement array will be an array of objects with each object
     // having a user then place. IE: [{easy, 1st}, {another, 2nd}]
-    const playerPlacements = room.players.sort((a, b) => {
-        return a.score - b.score;
-    });
+    // const playerPlacements = room.players.sort((a, b) => {
+    //     return a.score - b.score;
+    // });
+    savePuzzle(room);
 };
 
 /**
