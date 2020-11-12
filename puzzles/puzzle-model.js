@@ -8,6 +8,8 @@ module.exports = {
     addWords,
     getGame,
     getWords,
+    addGamesToUsers,
+    addSolvedWords,
 };
 
 function addUser(user) {
@@ -24,12 +26,12 @@ function getUserByEmail(email) {
 }
 
 function getGames() {
-    return db("puzzles");
+    return db("games");
 }
 
-function addGame(data) {
-    return db("puzzles")
-        .insert(data, "id")
+function addGame(game) {
+    return db("games")
+        .insert(game, "id")
         .then((ids) => {
             const [id] = ids;
 
@@ -48,9 +50,29 @@ function addWords(words) {
 }
 
 function getGame(id) {
-    return db("puzzles").where("id", "=", id).first();
+    return db("games").where("id", "=", id).first();
 }
 
 function getWords(id) {
-    return db("words").where("puzzle_id", "=", id);
+    return db("words").where("games_id", "=", id);
+}
+
+function addGamesToUsers(gameWithUser) {
+    return db("games_users")
+        .insert(gameWithUser, "id")
+        .then((ids) => {
+            const [id] = ids;
+
+            return id;
+        });
+}
+
+function addSolvedWords(solvedWords) {
+    return db("solved_words")
+        .insert(solvedWords, "id")
+        .then((ids) => {
+            const [id] = ids;
+
+            return id;
+        });
 }
