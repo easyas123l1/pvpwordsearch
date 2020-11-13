@@ -5,27 +5,29 @@ module.exports = {
 };
 
 /**
- * Will solve a word and update users wordsDir lines and word score.
+ * Will save the puzzle and the game state to database.
  * @param room A object that represents a room from the `rooms` instance variable object in socket
  */
 function savePuzzle(room) {
     let words = room.puzzle.wordsDir;
-    let name = room.name;
-    let code = room.puzzle.puzzle;
     let description = "";
-    // let { name, code, description, words } =
-    let newObj = {
-        name,
-        code,
+    let saveGame = {
+        name: room.name,
+        code: room.puzzle.puzzle,
         description,
+        size: room.puzzle.size,
+        number_of_words: room.puzzle.numberOfWords,
+        time: room.puzzle.timer,
+        minimum_word_length: room.puzzle.minimumWordSize,
+        maximum_word_length: room.puzzle.maximumWordSize,
     };
-    Puzzles.addGames(newObj)
-        .then((id) => {
+    Puzzles.addGame(saveGame)
+        .then((gameid) => {
             for (let word of words) {
-                word.puzzle_id = id;
+                word.game_id = gameid;
             }
             Puzzles.addWords(words).then((_) => {
-                Puzzles.getPuzzle(id).then((puzzle) => {
+                Puzzles.getGame(id).then((puzzle) => {
                     Puzzles.getWords(id).then((puzWords) => {
                         let retObj = {
                             puzzle,
