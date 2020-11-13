@@ -3,6 +3,7 @@ const db = require("../data/db-config.js");
 module.exports = {
     addUser,
     getUserByEmail,
+    updateUserByEmail,
     getGames,
     addGame,
     addWords,
@@ -23,6 +24,13 @@ function addUser(user) {
 
 function getUserByEmail(email) {
     return db("users").where("email", "=", email).first();
+}
+
+function updateUserByEmail(email, user) {
+    return db("users")
+        .where("email", "=", email)
+        .update(user)
+        .then(() => getUserByEmail(email));
 }
 
 function getGames() {
