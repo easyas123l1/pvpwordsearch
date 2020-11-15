@@ -278,9 +278,9 @@ io.on("connection", (socket) => {
     /**
      * Gets fired when a user connects should respond with userInfo
      */
-    socket.on("userInfo", (email) => {
+    socket.on("userInfo", (email, name) => {
         // make sure user sent us a email
-        if (email) {
+        if (email && name) {
             // if user hasn't been set yet.
             if (!socket.email) {
                 // check if user already logged in by email
@@ -288,11 +288,13 @@ io.on("connection", (socket) => {
                     // socket.emit("alreadyConnected"); //uncomment this line for production
                     socket.id = uuid(); //comment out this line for production
                     socket.email = email; //comment out this line for production
+                    socket.name = name; //comment out this line for production
                     connections[socket.id] = email; //comment out this line for production
                     socket.emit("goodConnection", socket.id); //comment out this line for production
                 } else {
                     socket.id = uuid();
                     socket.email = email;
+                    socket.name = name;
                     connections[socket.id] = email;
                     connectionsEmail[email] = socket.id;
                     socket.emit("goodConnection", socket.id);
