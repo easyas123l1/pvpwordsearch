@@ -7,8 +7,12 @@ router.post("/user", (req, res) => {
     let { email } = req.body;
     Puzzles.getUserByEmail(email)
         .then((user) => {
-            if (user) {
+            if (user.name) {
                 res.status(200).json(user);
+            } else if (user) {
+                res.status(201).json({
+                    newAccount: "create new account please enter name.",
+                });
             } else {
                 let newUser = {
                     email,
@@ -29,7 +33,7 @@ router.post("/user", (req, res) => {
         });
 });
 
-// update user by email.
+// update users info by email.
 router.put("/user", (req, res) => {
     let { user } = req.body;
     Puzzles.updateUserByEmail(user.email, user)
