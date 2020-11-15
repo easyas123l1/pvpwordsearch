@@ -23,7 +23,7 @@ function addUser(user) {
 }
 
 function getUserByEmail(email) {
-    return db("users").where("email", "=", email).first();
+    return db("users").where("email", "=", email);
 }
 
 function updateUserByEmail(email, user) {
