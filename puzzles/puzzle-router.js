@@ -35,8 +35,13 @@ router.post("/user", (req, res) => {
 
 // update users info by email.
 router.put("/user", (req, res) => {
-    let { user } = req.body;
-    Puzzles.updateUserByEmail(user.email, user)
+    console.log(req.body);
+    let { email, name } = req.body;
+    const updateUser = {
+        email,
+        name,
+    };
+    Puzzles.updateUserByEmail(email, updateUser)
         .then((user) => {
             res.status(200).json(user);
         })
