@@ -23,12 +23,19 @@ function savePuzzle(room) {
     };
     Puzzles.addGame(saveGame)
         .then((gameid) => {
+            const saveWords = [];
             for (let word of words) {
-                word.game_id = gameid;
+                const saveWord = {
+                    word: word.word,
+                    position: word.position,
+                    direction: word.direction,
+                    games_id: gameid,
+                };
+                saveWords.push(saveWord);
             }
-            Puzzles.addWords(words).then((_) => {
-                Puzzles.getGame(id).then((puzzle) => {
-                    Puzzles.getWords(id).then((puzWords) => {
+            Puzzles.addWords(saveWords).then((_) => {
+                Puzzles.getGame(gameid).then((puzzle) => {
+                    Puzzles.getWords(gameid).then((puzWords) => {
                         let retObj = {
                             puzzle,
                             puzWords,
