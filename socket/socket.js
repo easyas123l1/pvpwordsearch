@@ -167,6 +167,7 @@ const joinRoom = (socket, room) => {
         room.sockets.push(socket);
         const playerObj = {
             email: socket.email,
+            name: socket.name,
             id: socket.id,
             score: 0,
             wordsDir: [],
