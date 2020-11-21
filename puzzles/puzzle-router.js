@@ -7,12 +7,14 @@ router.post("/user", (req, res) => {
     let { email } = req.body;
     Puzzles.getUserByEmail(email)
         .then((user) => {
-            if (user.name) {
-                res.status(200).json(user);
-            } else if (user) {
-                res.status(201).json({
-                    newAccount: "create new account please enter name.",
-                });
+            if (user) {
+                if (user.name) {
+                    res.status(200).json(user);
+                } else {
+                    res.status(201).json({
+                        newAccount: "create new account please enter name.",
+                    });
+                }
             } else {
                 let newUser = {
                     email,
@@ -21,10 +23,19 @@ router.post("/user", (req, res) => {
                     time_played: 0,
                     words_solved: 0,
                 };
-                Puzzles.addUser(newUser);
-                res.status(201).json({
-                    newAccount: "create new account please enter name.",
-                });
+                Puzzles.addUser(newUser)
+                    .then((dbuser) => {
+                        res.status(201).json({
+                            newAccount: "create new account please enter name.",
+                            dbuser,
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        res.status(201).json({
+                            message: "duplicate creations attempted",
+                        });
+                    });
             }
         })
         .catch((err) => {
