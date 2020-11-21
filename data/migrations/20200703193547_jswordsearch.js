@@ -63,7 +63,7 @@ exports.up = function (knex) {
             tbl.integer("games_id")
                 .unsigned()
                 .references("id")
-                .inTable("puzzles")
+                .inTable("games")
                 .onDelete("RESTRICT")
                 .onUpdate("CASCADE");
         })
