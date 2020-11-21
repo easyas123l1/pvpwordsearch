@@ -23,14 +23,21 @@ function addUser(user) {
 }
 
 function getUserByEmail(email) {
-    return db("users").where("email", "=", email);
+    return db("users")
+        .where("email", "=", email)
+        .then((users) => {
+            const [user] = users;
+            return user;
+        });
 }
 
 function updateUserByEmail(email, user) {
     return db("users")
         .where("email", "=", email)
         .update(user)
-        .then(() => getUserByEmail(email));
+        .then(() => {
+            return getUserByEmail(email);
+        });
 }
 
 function getGames() {
