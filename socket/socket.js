@@ -333,6 +333,7 @@ io.on("connection", (socket) => {
                     words: [],
                     wordsDir: [],
                     puzzle: "",
+                    originalTime: roomInfo.timer,
                 },
             };
             rooms[room.id] = room;
