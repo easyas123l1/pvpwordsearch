@@ -17,7 +17,7 @@ function savePuzzle(room) {
         description,
         size: room.puzzle.size,
         number_of_words: room.puzzle.numberOfWords,
-        time: room.puzzle.timer,
+        time: room.puzzle.originalTime,
         minimum_word_length: room.puzzle.minimumWordSize,
         maximum_word_length: room.puzzle.maximumWordSize,
     };
