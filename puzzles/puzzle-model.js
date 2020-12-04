@@ -3,6 +3,7 @@ const db = require("../data/db-config.js");
 module.exports = {
     addUser,
     getUserByEmail,
+    getUsersByEmails,
     updateUserByEmail,
     getGames,
     addGame,
@@ -10,6 +11,7 @@ module.exports = {
     getGame,
     getWords,
     addGamesToUsers,
+    getGamesToUsersByGameId,
     addSolvedWords,
 };
 
@@ -29,6 +31,10 @@ function getUserByEmail(email) {
             const [user] = users;
             return user;
         });
+}
+
+function getUsersByEmails(emails) {
+    return db("users").where((user) => user.whereIn("email", emails));
 }
 
 function updateUserByEmail(email, user) {
@@ -72,22 +78,28 @@ function getWords(id) {
     return db("words").where("games_id", "=", id);
 }
 
-function addGamesToUsers(gameWithUser) {
+function addGamesToUsers(gameWithUser, gameid) {
     return db("games_users")
         .insert(gameWithUser, "id")
-        .then((ids) => {
-            const [id] = ids;
-
-            return id;
+        .then(() => {
+            return getGamesToUsersByGameId(gameid);
         });
 }
 
-function addSolvedWords(solvedWords) {
+function getGamesToUsersByGameId(gameid) {
+    return db("games_users").where("game_id", "=", gameid);
+}
+
+function addSolvedWords(solvedWords, gamesUserIds) {
     return db("solved_words")
         .insert(solvedWords, "id")
-        .then((ids) => {
-            const [id] = ids;
-
-            return id;
+        .then(() => {
+            return getSolvedWordsByGamesUserIds(gamesUserIds);
         });
+}
+
+function getSolvedWordsByGamesUserIds(gamesUserIds) {
+    return db("solved_words").where((id) =>
+        id.whereIn("games_users_id", gamesUserIds)
+    );
 }
