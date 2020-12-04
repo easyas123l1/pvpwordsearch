@@ -107,6 +107,7 @@ const startTimer = (room) => {
         }, 1000);
     } else {
         room.state = "GAMEOVER";
+        updateRoom(room);
         endGame(room);
     }
 };
@@ -124,8 +125,8 @@ const startGame = (socket, room) => {
         generatePuzzle(room.puzzle);
         console.log(room.puzzle.puzzle, "THEPUZZLE", room.puzzle.wordsDir);
         room.players.forEach((player) => {
-            player.wordsDir = room.puzzle.wordsDir;
-            player.lines = room.puzzle.lines;
+            player.wordsDir = JSON.parse(JSON.stringify(room.puzzle.wordsDir));
+            player.lines = JSON.parse(JSON.stringify(room.puzzle.lines));
         });
         updateRoom(room);
 
@@ -173,8 +174,8 @@ const joinRoom = (socket, room) => {
             wordsDir: [],
             lines: [],
         };
-        playerObj.wordsDir = room.puzzle.wordsDir;
-        playerObj.lines = room.puzzle.lines;
+        playerObj.wordsDir = JSON.parse(JSON.stringify(room.puzzle.wordsDir));
+        playerObj.lines = JSON.parse(JSON.stringify(room.puzzle.lines));
         room.players.push(playerObj);
         socket.join(room.id, () => {
             // store the room id in the socket for future use
