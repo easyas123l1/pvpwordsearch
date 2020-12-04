@@ -36,11 +36,86 @@ function savePuzzle(room) {
             Puzzles.addWords(saveWords).then((_) => {
                 Puzzles.getGame(gameid).then((puzzle) => {
                     Puzzles.getWords(gameid).then((puzWords) => {
-                        let retObj = {
-                            puzzle,
-                            puzWords,
-                        };
-                        console.log("puzzle saved succesfully!", retObj);
+                        // let retObj = {
+                        //     puzzle,
+                        //     puzWords,
+                        // };
+                        const wordIdPair = {};
+                        puzWords.map((puzWord) => {
+                            wordIdPair[puzWord.word] = puzWord.id;
+                        });
+                        let usersEmails = [];
+                        room.players.map((player) => {
+                            usersEmails.push(player.email);
+                        });
+                        Puzzles.getUsersByEmails(usersEmails).then(
+                            (usersDB) => {
+                                const userEmailDBIdPair = {};
+                                const userDBIdEmailPair = {};
+                                usersDB.map((user) => {
+                                    userEmailDBIdPair[user.email] = user.id;
+                                    userDBIdEmailPair[user.id] = user.email;
+                                });
+                                let saveGamesToUsers = [];
+                                room.players.map((player) => {
+                                    let dbUserId =
+                                        userEmailDBIdPair[player.email];
+                                    const saveGameToUser = {
+                                        user_id: dbUserId,
+                                        game_id: gameid,
+                                    };
+                                    saveGamesToUsers.push(saveGameToUser);
+                                });
+                                Puzzles.addGamesToUsers(
+                                    saveGamesToUsers,
+                                    gameid
+                                ).then((dbGamesToUsers) => {
+                                    console.log(dbGamesToUsers);
+                                    let saveSolvedWords = [];
+                                    let gamesUserIds = [];
+                                    for (
+                                        i = 0;
+                                        i < dbGamesToUsers.length;
+                                        i++
+                                    ) {
+                                        gamesUserIds.push(dbGamesToUsers[i].id);
+                                        room.players[i].wordsDir.map(
+                                            (wordObj) => {
+                                                if (wordObj.solved) {
+                                                    let gameUserId =
+                                                        dbGamesToUsers[i].id;
+                                                    let wordId =
+                                                        wordIdPair[
+                                                            wordObj.word
+                                                        ];
+                                                    const saveSolvedWord = {
+                                                        games_users_id: gameUserId,
+                                                        words_id: wordId,
+                                                    };
+                                                    saveSolvedWords.push(
+                                                        saveSolvedWord
+                                                    );
+                                                }
+                                            }
+                                        );
+                                    }
+                                    if (saveSolvedWords.length > 0) {
+                                        Puzzles.addSolvedWords(
+                                            saveSolvedWords,
+                                            gamesUserIds
+                                        )
+                                            .then((solvedWordsHope) => {
+                                                console.log(solvedWordsHope);
+                                            })
+                                            .catch((err) => {
+                                                console.log(err);
+                                            });
+                                    } else {
+                                        console.log("no words solved!");
+                                    }
+                                });
+                            }
+                        );
                     });
                 });
             });
