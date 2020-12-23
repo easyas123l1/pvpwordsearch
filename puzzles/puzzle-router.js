@@ -46,7 +46,6 @@ router.post("/user", (req, res) => {
 
 // update users info by email.
 router.put("/user", (req, res) => {
-    console.log(req.body);
     let { email, name } = req.body;
     const updateUser = {
         email,
@@ -65,6 +64,19 @@ router.put("/user", (req, res) => {
 // get all puzzles
 router.get("/", (req, res) => {
     Puzzles.getPuzzles()
+        .then((puzzles) => {
+            res.status(200).json(puzzles);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ message: "Failed to get puzzles" });
+        });
+});
+
+// get users match history
+router.post("/user/history", (req, res) => {
+    let { email } = req.body;
+    Puzzles.getUserHistory(email)
         .then((puzzles) => {
             res.status(200).json(puzzles);
         })
